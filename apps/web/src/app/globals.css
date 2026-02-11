@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-hive-bg text-gray-100 antialiased;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-hive-surface border border-hive-border rounded-xl p-4;
+  }
+  .badge-bull {
+    @apply bg-hive-bull/20 text-hive-bull text-xs font-medium px-2 py-0.5 rounded-full;
+  }
+  .badge-bear {
+    @apply bg-hive-bear/20 text-hive-bear text-xs font-medium px-2 py-0.5 rounded-full;
+  }
+  .badge-neutral {
+    @apply bg-hive-neutral/20 text-hive-neutral text-xs font-medium px-2 py-0.5 rounded-full;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #12121a;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a3e;
+  border-radius: 3px;
+}

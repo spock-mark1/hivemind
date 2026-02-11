@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  agents       Agent[]
+}
+
+model Agent {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  name          String
+  persona       String
+  strategy      String      @db.Text
+  twitterHandle String
+  sessionData   Bytes?
+  status        AgentStatus @default(IDLE)
+  createdAt     DateTime    @default(now())
+  tweets        Tweet[]
+  opinions      Opinion[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Tweet {
+  id             String    @id @default(cuid())
+  agentId        String
+  agent          Agent     @relation(fields: [agentId], references: [id])
+  tweetId        String?   @unique
+  content        String    @db.Text
+  type           TweetType
+  replyToTweetId String?
+  sentiment      Float?
+  tokens         String[]
+  postedAt       DateTime  @default(now())
+  reactions      Int       @default(0)
+
+  @@index([agentId])
+  @@index([postedAt])
+}
+
+model Opinion {
+  id         String   @id @default(cuid())
+  agentId    String
+  agent      Agent    @relation(fields: [agentId], references: [id])
+  token      String
+  stance     Float
+  confidence Float
+  reasoning  String   @db.Text
+  createdAt  DateTime @default(now())
+
+  @@index([agentId])
+  @@index([token, createdAt])
+}
+
+model MarketSnapshot {
+  id             String   @id @default(cuid())
+  token          String
+  price          Float
+  priceChange24h Float
+  volume24h      Float
+  tvl            Float?
+  timestamp      DateTime @default(now())
+
+  @@index([token, timestamp])
+}
+
+model ConsensusEvent {
+  id               String        @id @default(cuid())
+  token            String
+  type             ConsensusType
+  avgSentiment     Float
+  participantCount Int
+  summary          String        @db.Text
+  timestamp        DateTime      @default(now())
+
+  @@index([token, timestamp])
+}
+
+enum AgentStatus {
+  IDLE
+  RUNNING
+  PAUSED
+  ERROR
+}
+
+enum TweetType {
+  ORIGINAL
+  REPLY
+  QUOTE
+}
+
+enum ConsensusType {
+  AGREEMENT
+  DISAGREEMENT
+  SHIFT
+}

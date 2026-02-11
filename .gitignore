@@ -3,6 +3,7 @@ dist/
 .next/
 .env
 *.log
+*.tsbuildinfo
 .turbo/
 .vercel/
 postgres_data/

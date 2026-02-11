@@ -15,6 +15,8 @@ export default function ConsensusPage() {
     Promise.all([api.getConsensus(), api.getSentiments()]).then(([e, s]) => {
       setEvents(e);
       setSentiments(s);
+    }).catch((err) => {
+      console.error('Failed to load consensus data:', err);
     });
   }, []);
 

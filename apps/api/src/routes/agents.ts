@@ -2,6 +2,7 @@ import { FastifyPluginAsync } from 'fastify';
 import { z } from 'zod';
 import { prisma } from '@selanet/db';
 import { authenticate } from '../plugins/auth.js';
+import { agentOrchestrator } from '../services/agent-orchestrator.js';
 
 const createAgentSchema = z.object({
   name: z.string().min(1),
@@ -23,12 +24,21 @@ export const agentRoutes: FastifyPluginAsync = async (app) => {
     });
   });
 
-  // List all agents (public, for dashboard/network graph)
+  // List all agents (public, for dashboard/network graph — no strategy exposed)
   app.get('/all', async () => {
-    return prisma.agent.findMany({
-      include: { _count: { select: { tweets: true, opinions: true } } },
+    const agents = await prisma.agent.findMany({
+      select: {
+        id: true,
+        name: true,
+        persona: true,
+        twitterHandle: true,
+        status: true,
+        createdAt: true,
+        _count: { select: { tweets: true, opinions: true } },
+      },
       orderBy: { createdAt: 'desc' },
     });
+    return agents;
   });
 
   // Get agent by ID (own agent: full detail; other agent: public detail)
@@ -97,7 +107,7 @@ export const agentRoutes: FastifyPluginAsync = async (app) => {
     return { success: true, hasSession: false };
   });
 
-  // Update agent status (owner only)
+  // Update agent status (owner only) — triggers orchestrator start/stop/pause
   app.patch<{ Params: { id: string } }>('/:id/status', async (request, reply) => {
     const { status } = z.object({ status: z.enum(['IDLE', 'RUNNING', 'PAUSED']) }).parse(request.body);
     const agent = await prisma.agent.findUnique({ where: { id: request.params.id } });
@@ -105,7 +115,21 @@ export const agentRoutes: FastifyPluginAsync = async (app) => {
     if (agent.userId !== request.userId) {
       return reply.status(403).send({ error: 'Not your agent' });
     }
-    return prisma.agent.update({ where: { id: request.params.id }, data: { status } });
+
+    switch (status) {
+      case 'RUNNING':
+        await agentOrchestrator.startAgent(agent.id);
+        break;
+      case 'PAUSED':
+        await agentOrchestrator.pauseAgent(agent.id);
+        break;
+      case 'IDLE':
+        await agentOrchestrator.stopAgent(agent.id);
+        break;
+    }
+
+    const updated = await prisma.agent.findUnique({ where: { id: agent.id } });
+    return updated;
   });
 
   // Delete agent (owner only, cascade)

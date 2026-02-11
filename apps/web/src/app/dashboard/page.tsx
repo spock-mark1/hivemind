@@ -30,6 +30,8 @@ export default function DashboardPage() {
       setStats(s);
       setInteractions(i);
       setSentiments(sent);
+    }).catch((err) => {
+      console.error('Failed to load dashboard data:', err);
     });
   }, []);
 

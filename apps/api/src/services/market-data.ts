@@ -16,38 +16,44 @@ export class MarketDataService {
   async fetchPrices(): Promise<MarketData[]> {
     const ids = TRACKED_TOKENS.map((t) => COINGECKO_IDS[t]).join(',');
 
-    const { data } = await axios.get(`${COINGECKO_BASE}/simple/price`, {
-      params: {
-        ids,
-        vs_currencies: 'usd',
-        include_24hr_change: true,
-        include_24hr_vol: true,
-      },
-      headers: this.config.COINGECKO_API_KEY
-        ? { 'x-cg-demo-api-key': this.config.COINGECKO_API_KEY }
-        : {},
-    });
+    try {
+      const { data } = await axios.get(`${COINGECKO_BASE}/simple/price`, {
+        params: {
+          ids,
+          vs_currencies: 'usd',
+          include_24hr_change: true,
+          include_24hr_vol: true,
+        },
+        headers: this.config.COINGECKO_API_KEY
+          ? { 'x-cg-demo-api-key': this.config.COINGECKO_API_KEY }
+          : {},
+        timeout: 10000,
+      });
 
-    const results: MarketData[] = [];
-    const idToSymbol = Object.fromEntries(
-      Object.entries(COINGECKO_IDS).map(([symbol, id]) => [id, symbol])
-    );
+      const results: MarketData[] = [];
+      const idToSymbol = Object.fromEntries(
+        Object.entries(COINGECKO_IDS).map(([symbol, id]) => [id, symbol])
+      );
 
-    for (const [coinId, values] of Object.entries(data) as [string, any][]) {
-      const token = idToSymbol[coinId];
-      if (!token) continue;
+      for (const [coinId, values] of Object.entries(data) as [string, any][]) {
+        const token = idToSymbol[coinId];
+        if (!token) continue;
 
-      const marketData: MarketData = {
-        token,
-        price: values.usd ?? 0,
-        priceChange24h: values.usd_24h_change ?? 0,
-        volume24h: values.usd_24h_vol ?? 0,
-        timestamp: new Date(),
-      };
-      results.push(marketData);
+        const marketData: MarketData = {
+          token,
+          price: values.usd ?? 0,
+          priceChange24h: values.usd_24h_change ?? 0,
+          volume24h: values.usd_24h_vol ?? 0,
+          timestamp: new Date(),
+        };
+        results.push(marketData);
+      }
+
+      return results;
+    } catch (error) {
+      console.error('Failed to fetch prices from CoinGecko:', error);
+      return [];
     }
-
-    return results;
   }
 
   /**

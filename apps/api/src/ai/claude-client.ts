@@ -56,5 +56,9 @@ export async function askClaudeJSON<T>(
     jsonStr = jsonStr.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
   }
 
-  return JSON.parse(jsonStr) as T;
+  try {
+    return JSON.parse(jsonStr) as T;
+  } catch {
+    throw new Error(`Claude returned invalid JSON: ${jsonStr.slice(0, 200)}`);
+  }
 }

@@ -47,11 +47,33 @@ async function main() {
   app.log.info(`SelaNet Hive API running on port ${config.API_PORT}`);
 
   // Start background workers
-  startMarketPollWorker();
-  startAgentLoopWorker();
-  startTweetScanWorker();
-  startConsensusWorker();
+  const workers = [
+    startMarketPollWorker(),
+    startAgentLoopWorker(),
+    startTweetScanWorker(),
+    startConsensusWorker(),
+  ];
   app.log.info('All background workers started');
+
+  // Graceful shutdown
+  const shutdown = async (signal: string) => {
+    app.log.info(`Received ${signal}, shutting down gracefully...`);
+    await app.close();
+    for (const w of workers) {
+      try {
+        if (w && typeof w === 'object') {
+          if ('worker' in w && w.worker) await w.worker.close();
+          if ('queue' in w && w.queue) await w.queue.close();
+        }
+      } catch (err) {
+        console.error('Error closing worker:', err);
+      }
+    }
+    process.exit(0);
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
 main().catch((err) => {

@@ -66,8 +66,12 @@ export class TwitterBrowser {
     };
 
     if (sessionData) {
-      const storageState = JSON.parse(sessionData.toString('utf-8'));
-      contextOptions.storageState = storageState;
+      try {
+        const storageState = JSON.parse(sessionData.toString('utf-8'));
+        contextOptions.storageState = storageState;
+      } catch {
+        throw new Error('Invalid session data: corrupted or malformed JSON');
+      }
     }
 
     const context = await this.browser!.newContext(contextOptions);

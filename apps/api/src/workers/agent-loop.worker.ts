@@ -75,14 +75,16 @@ export function startAgentLoopWorker() {
         // Step 3: AI analysis
         const analyses = await brain.analyzeMarket(context);
 
-        // Save opinions
+        // Save opinions (clamp values to valid ranges)
         for (const analysis of analyses) {
+          const stance = Math.max(-1, Math.min(1, Number(analysis.sentiment) || 0));
+          const confidence = Math.max(0, Math.min(1, Number(analysis.confidence) || 0));
           const opinion = await prisma.opinion.create({
             data: {
               agentId: agent.id,
               token: analysis.token,
-              stance: analysis.sentiment,
-              confidence: analysis.confidence,
+              stance,
+              confidence,
               reasoning: analysis.reasoning,
             },
           });
@@ -207,5 +209,5 @@ export function startAgentLoopWorker() {
   });
 
   console.log('[AgentLoop] Worker started');
-  return worker;
+  return { worker };
 }

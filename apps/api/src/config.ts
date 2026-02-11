@@ -12,6 +12,23 @@ const envSchema = z.object({
   SESSION_ENCRYPTION_KEY: z.string().default('dev-key-change-me-32-bytes!!!!!'),
   WS_CORS_ORIGIN: z.string().default('http://localhost:3000'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+}).superRefine((data, ctx) => {
+  if (data.NODE_ENV === 'production') {
+    if (data.JWT_SECRET === 'dev-secret-change-me') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'JWT_SECRET must be set to a secure value in production',
+        path: ['JWT_SECRET'],
+      });
+    }
+    if (data.SESSION_ENCRYPTION_KEY === 'dev-key-change-me-32-bytes!!!!!') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'SESSION_ENCRYPTION_KEY must be set to a secure value in production',
+        path: ['SESSION_ENCRYPTION_KEY'],
+      });
+    }
+  }
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

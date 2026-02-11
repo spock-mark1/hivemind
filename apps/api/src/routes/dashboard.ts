@@ -16,8 +16,9 @@ export const dashboardRoutes: FastifyPluginAsync = async (app) => {
   // Recent tweets across all agents
   app.get('/feed', async (request) => {
     const { limit = '30' } = request.query as Record<string, string>;
+    const take = Math.min(Math.max(parseInt(limit, 10) || 30, 1), 100);
     return prisma.tweet.findMany({
-      take: parseInt(limit, 10),
+      take,
       orderBy: { postedAt: 'desc' },
       include: { agent: { select: { id: true, name: true, persona: true, twitterHandle: true } } },
     });
@@ -125,7 +126,7 @@ export const dashboardRoutes: FastifyPluginAsync = async (app) => {
     '/sentiment-history/:token',
     async (request) => {
       const token = request.params.token.toUpperCase();
-      const hours = parseInt((request.query as any).hours || '24', 10);
+      const hours = Math.min(Math.max(parseInt((request.query as any).hours || '24', 10) || 24, 1), 168);
       const since = new Date(Date.now() - hours * 60 * 60 * 1000);
 
       const opinions = await prisma.opinion.findMany({

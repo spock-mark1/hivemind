@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 import { api } from '@/lib/api';
+import { TRACKED_TOKENS } from '@selanet/shared';
 
 interface ChartPoint {
   time: string;
@@ -16,14 +17,21 @@ export default function PriceCorrelation() {
   const [data, setData] = useState<ChartPoint[]>([]);
   const [selectedToken, setSelectedToken] = useState('BTC');
   const [loading, setLoading] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
+    // Abort previous fetch
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     Promise.all([
       api.getPriceHistory(selectedToken, 24),
       api.getSentimentHistory(selectedToken, 24),
     ])
       .then(([priceHistory, sentimentHistory]) => {
+        if (controller.signal.aborted) return;
         // Build time→sentiment lookup from actual Opinion data
         const sentimentByHour = new Map<string, number>();
         for (const s of sentimentHistory) {
@@ -56,13 +64,18 @@ export default function PriceCorrelation() {
         setData(merged);
       })
       .catch((err) => {
+        if (controller.signal.aborted) return;
         console.error('Failed to load correlation data:', err);
         setData([]);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+
+    return () => controller.abort();
   }, [selectedToken]);
 
-  const tokens = ['BTC', 'ETH', 'SOL', 'AVAX', 'ARB'];
+  const tokens = TRACKED_TOKENS.slice(0, 5);
 
   return (
     <div>

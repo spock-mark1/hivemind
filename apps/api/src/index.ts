@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import { ZodError } from 'zod';
 import { getConfig } from './config.js';
 import { registerWebSocket } from './plugins/websocket.js';
 import { registerAuth } from './plugins/auth.js';
@@ -39,6 +40,18 @@ async function main() {
   await app.register(dashboardRoutes, { prefix: '/api/dashboard' });
   await app.register(marketRoutes, { prefix: '/api/market' });
 
+  // Consistent error handler for Zod validation errors
+  app.setErrorHandler((error, _request, reply) => {
+    if (error instanceof ZodError) {
+      return reply.status(400).send({
+        error: error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '),
+      });
+    }
+    reply.status(error.statusCode ?? 500).send({
+      error: error.message || 'Internal server error',
+    });
+  });
+
   // Health check
   app.get('/api/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
 
@@ -64,6 +77,7 @@ async function main() {
         if (w && typeof w === 'object') {
           if ('worker' in w && w.worker) await w.worker.close();
           if ('queue' in w && w.queue) await w.queue.close();
+          if ('connection' in w && w.connection) await w.connection.quit();
         }
       } catch (err) {
         console.error('Error closing worker:', err);

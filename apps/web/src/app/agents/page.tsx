@@ -17,11 +17,15 @@ interface Agent {
 
 export default function AgentsPage() {
   const [agents, setAgents] = useState<Agent[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ name: '', persona: '', strategy: '', twitterHandle: '' });
 
   useEffect(() => {
-    api.getAgents().then(setAgents);
+    api.getAgents()
+      .then(setAgents)
+      .catch((err) => console.error('Failed to load agents:', err))
+      .finally(() => setLoading(false));
   }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -57,40 +61,59 @@ export default function AgentsPage() {
       {showCreate && (
         <form onSubmit={handleCreate} className="card mb-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input
-              placeholder="Agent Name"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="bg-hive-bg border border-hive-border rounded-lg px-3 py-2 text-sm"
-              required
-            />
-            <input
-              placeholder="Twitter Handle (without @)"
-              value={form.twitterHandle}
-              onChange={(e) => setForm({ ...form, twitterHandle: e.target.value })}
-              className="bg-hive-bg border border-hive-border rounded-lg px-3 py-2 text-sm"
-              required
-            />
-            <select
-              value={form.persona}
-              onChange={(e) => setForm({ ...form, persona: e.target.value })}
-              className="bg-hive-bg border border-hive-border rounded-lg px-3 py-2 text-sm"
-              required
-            >
-              <option value="">Select Persona</option>
-              <option value="Bullish Maximalist">Bullish Maximalist</option>
-              <option value="Bear Analyst">Bear Analyst</option>
-              <option value="DeFi Degen">DeFi Degen</option>
-              <option value="Macro Strategist">Macro Strategist</option>
-            </select>
+            <div>
+              <label htmlFor="agent-name" className="block text-xs text-gray-400 mb-1">Agent Name</label>
+              <input
+                id="agent-name"
+                placeholder="e.g. Alpha Bot"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className="w-full bg-hive-bg border border-hive-border rounded-lg px-3 py-2 text-sm"
+                required
+                maxLength={100}
+              />
+            </div>
+            <div>
+              <label htmlFor="twitter-handle" className="block text-xs text-gray-400 mb-1">Twitter Handle</label>
+              <input
+                id="twitter-handle"
+                placeholder="without @"
+                value={form.twitterHandle}
+                onChange={(e) => setForm({ ...form, twitterHandle: e.target.value.replace(/^@/, '') })}
+                className="w-full bg-hive-bg border border-hive-border rounded-lg px-3 py-2 text-sm"
+                required
+                maxLength={50}
+              />
+            </div>
+            <div>
+              <label htmlFor="persona" className="block text-xs text-gray-400 mb-1">Persona</label>
+              <select
+                id="persona"
+                value={form.persona}
+                onChange={(e) => setForm({ ...form, persona: e.target.value })}
+                className="w-full bg-hive-bg border border-hive-border rounded-lg px-3 py-2 text-sm"
+                required
+              >
+                <option value="">Select Persona</option>
+                <option value="Bullish Maximalist">Bullish Maximalist</option>
+                <option value="Bear Analyst">Bear Analyst</option>
+                <option value="DeFi Degen">DeFi Degen</option>
+                <option value="Macro Strategist">Macro Strategist</option>
+              </select>
+            </div>
           </div>
-          <textarea
-            placeholder="Investment Strategy (detailed prompt for the AI agent)"
-            value={form.strategy}
-            onChange={(e) => setForm({ ...form, strategy: e.target.value })}
-            className="w-full bg-hive-bg border border-hive-border rounded-lg px-3 py-2 text-sm h-24"
-            required
-          />
+          <div>
+            <label htmlFor="strategy" className="block text-xs text-gray-400 mb-1">Investment Strategy</label>
+            <textarea
+              id="strategy"
+              placeholder="Detailed prompt for the AI agent..."
+              value={form.strategy}
+              onChange={(e) => setForm({ ...form, strategy: e.target.value })}
+              className="w-full bg-hive-bg border border-hive-border rounded-lg px-3 py-2 text-sm h-24"
+              required
+              maxLength={5000}
+            />
+          </div>
           <button type="submit" className="px-4 py-2 bg-hive-accent text-black rounded-lg text-sm font-semibold">
             Create Agent
           </button>
@@ -102,7 +125,10 @@ export default function AgentsPage() {
         {agents.map((agent) => (
           <AgentCard key={agent.id} agent={agent} onStatusChange={handleStatusChange} />
         ))}
-        {agents.length === 0 && (
+        {loading && (
+          <p className="text-gray-500 col-span-full text-center py-12">Loading agents...</p>
+        )}
+        {!loading && agents.length === 0 && (
           <p className="text-gray-500 col-span-full text-center py-12">
             No agents yet. Create your first AI agent to get started.
           </p>

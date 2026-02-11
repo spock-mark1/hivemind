@@ -125,5 +125,5 @@ export function startTweetScanWorker() {
   });
 
   console.log('[TweetScan] Worker started');
-  return { worker, queue };
+  return { worker, queue, connection };
 }

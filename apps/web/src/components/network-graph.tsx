@@ -18,9 +18,16 @@ interface Props {
   interactions: ResolvedEdge[];
 }
 
+interface AgentNode {
+  id: string;
+  name: string;
+  persona: string;
+  status: string;
+}
+
 export default function NetworkGraph({ interactions }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [agents, setAgents] = useState<any[]>([]);
+  const [agents, setAgents] = useState<AgentNode[]>([]);
   const [dimensions, setDimensions] = useState({ width: 600, height: 350 });
 
   useEffect(() => {
@@ -46,7 +53,7 @@ export default function NetworkGraph({ interactions }: Props) {
       val: a.status === 'RUNNING' ? 8 : 4,
     }));
 
-    const agentIds = new Set(agents.map((a: any) => a.id));
+    const agentIds = new Set(agents.map((a) => a.id));
 
     // Deduplicate edges: aggregate by source→target pair
     const edgeMap = new Map<string, { count: number; totalSentiment: number }>();

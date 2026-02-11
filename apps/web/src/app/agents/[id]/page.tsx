@@ -5,6 +5,24 @@ import { useParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import { sentimentLabel } from '@selanet/shared';
 
+interface TweetItem {
+  id: string;
+  content: string;
+  type: string;
+  tweetId?: string | null;
+  sentiment?: number | null;
+  postedAt: string;
+}
+
+interface OpinionItem {
+  id: string;
+  token: string;
+  stance: number;
+  confidence: number;
+  reasoning: string;
+  createdAt: string;
+}
+
 interface AgentDetail {
   id: string;
   name: string;
@@ -12,10 +30,10 @@ interface AgentDetail {
   strategy: string;
   twitterHandle: string;
   status: string;
-  sessionData?: any;
+  sessionData?: boolean | null;
   createdAt: string;
-  tweets: any[];
-  opinions: any[];
+  tweets: TweetItem[];
+  opinions: OpinionItem[];
 }
 
 export default function AgentDetailPage() {
@@ -30,13 +48,24 @@ export default function AgentDetailPage() {
       api.getAgent(params.id as string).then((data) => {
         setAgent(data);
         setSessionStatus(data.sessionData ? 'active' : 'none');
+      }).catch((err) => {
+        console.error('Failed to load agent:', err);
       });
     }
   }, [params.id]);
 
+  const MAX_SESSION_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
   const handleSessionUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !agent) return;
+
+    if (file.size > MAX_SESSION_FILE_SIZE) {
+      setSessionError(`File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum is 5MB.`);
+      setSessionStatus('error');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
 
     setSessionStatus('uploading');
     setSessionError('');
@@ -223,7 +252,7 @@ export default function AgentDetailPage() {
             Recent Tweets ({agent.tweets.length})
           </h2>
           <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
-            {agent.tweets.map((tweet: any) => (
+            {agent.tweets.map((tweet) => (
               <div key={tweet.id} className="border-b border-hive-border pb-3 last:border-0">
                 <p className="text-sm">{tweet.content}</p>
                 <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
@@ -252,7 +281,7 @@ export default function AgentDetailPage() {
             Opinions ({agent.opinions.length})
           </h2>
           <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
-            {agent.opinions.map((opinion: any) => (
+            {agent.opinions.map((opinion) => (
               <div key={opinion.id} className="border-b border-hive-border pb-3 last:border-0">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-sm">${opinion.token}</span>

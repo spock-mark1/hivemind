@@ -38,5 +38,5 @@ export function startConsensusWorker() {
   });
 
   console.log('[Consensus] Worker started');
-  return { worker, queue };
+  return { worker, queue, connection };
 }

@@ -38,5 +38,5 @@ export function startMarketPollWorker() {
   });
 
   console.log('[MarketPoll] Worker started');
-  return { worker, queue };
+  return { worker, queue, connection };
 }

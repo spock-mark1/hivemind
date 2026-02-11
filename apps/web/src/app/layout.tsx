@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import { ErrorBoundary } from '@/components/error-boundary';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -32,7 +33,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
           </div>
         </nav>
-        <main className="pt-14">{children}</main>
+        <main className="pt-14">
+          <ErrorBoundary>{children}</ErrorBoundary>
+        </main>
       </body>
     </html>
   );

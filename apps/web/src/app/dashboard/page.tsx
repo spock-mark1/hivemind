@@ -15,10 +15,25 @@ interface DashboardStats {
   consensusEvents: number;
 }
 
+interface Interaction {
+  sourceAgentId: string;
+  targetAgentId: string;
+  type: string;
+  sentiment: number | null;
+  postedAt: string;
+}
+
+interface TokenSentiment {
+  token: string;
+  avgSentiment: number;
+  participantCount: number;
+  agents: string[];
+}
+
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [interactions, setInteractions] = useState<any[]>([]);
-  const [sentiments, setSentiments] = useState<any[]>([]);
+  const [interactions, setInteractions] = useState<Interaction[]>([]);
+  const [sentiments, setSentiments] = useState<TokenSentiment[]>([]);
   const { connected } = useSocket();
 
   useEffect(() => {

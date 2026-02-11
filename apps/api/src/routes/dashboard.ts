@@ -126,7 +126,8 @@ export const dashboardRoutes: FastifyPluginAsync = async (app) => {
     '/sentiment-history/:token',
     async (request) => {
       const token = request.params.token.toUpperCase();
-      const hours = Math.min(Math.max(parseInt((request.query as any).hours || '24', 10) || 24, 1), 168);
+      const { hours: hoursParam = '24' } = request.query;
+      const hours = Math.min(Math.max(parseInt(hoursParam, 10) || 24, 1), 168);
       const since = new Date(Date.now() - hours * 60 * 60 * 1000);
 
       const opinions = await prisma.opinion.findMany({

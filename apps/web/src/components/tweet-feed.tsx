@@ -5,12 +5,24 @@ import { api } from '@/lib/api';
 import { useSocket } from '@/hooks/use-socket';
 import type { TweetData } from '@selanet/shared';
 
+interface FeedTweet {
+  id: string;
+  content: string;
+  type: string;
+  tokens?: string[];
+  postedAt: string;
+  authorHandle?: string;
+  agent?: { name: string; twitterHandle: string };
+}
+
 export default function TweetFeed() {
-  const [tweets, setTweets] = useState<any[]>([]);
+  const [tweets, setTweets] = useState<FeedTweet[]>([]);
   const { subscribe } = useSocket();
 
   useEffect(() => {
-    api.getFeed(30).then(setTweets);
+    api.getFeed(30).then(setTweets).catch((err) => {
+      console.error('Failed to load feed:', err);
+    });
   }, []);
 
   useEffect(() => {

@@ -24,11 +24,15 @@ export async function registerWebSocket(app: FastifyInstance) {
     app.log.info(`WebSocket client connected: ${socket.id}`);
 
     socket.on('subscribe:agent', (agentId: string) => {
-      socket.join(`agent:${agentId}`);
+      if (typeof agentId === 'string' && agentId.length > 0 && agentId.length < 100) {
+        socket.join(`agent:${agentId}`);
+      }
     });
 
     socket.on('subscribe:token', (token: string) => {
-      socket.join(`token:${token}`);
+      if (typeof token === 'string' && token.length > 0 && token.length < 20) {
+        socket.join(`token:${token}`);
+      }
     });
 
     socket.on('disconnect', () => {

@@ -74,7 +74,10 @@ export class TwitterBrowser {
       }
     }
 
-    const context = await this.browser!.newContext(contextOptions);
+    if (!this.browser) {
+      throw new Error('Browser failed to initialize');
+    }
+    const context = await this.browser.newContext(contextOptions);
 
     // Anti-detection: override navigator properties (runs in browser context)
     await context.addInitScript(`

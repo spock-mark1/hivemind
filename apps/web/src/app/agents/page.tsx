@@ -41,8 +41,12 @@ export default function AgentsPage() {
   };
 
   const handleStatusChange = async (id: string, status: string) => {
-    await api.updateAgentStatus(id, status);
-    setAgents((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
+    try {
+      await api.updateAgentStatus(id, status);
+      setAgents((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
+    } catch (err: any) {
+      alert(`Failed to update status: ${err.message}`);
+    }
   };
 
   return (

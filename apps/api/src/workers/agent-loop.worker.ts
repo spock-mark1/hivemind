@@ -131,7 +131,7 @@ export function startAgentLoopWorker() {
               content,
               type: action.type === 'tweet' ? 'ORIGINAL' : action.type === 'reply' ? 'REPLY' : 'QUOTE',
               replyToTweetId: action.targetTweetId,
-              sentiment: targetAnalysis?.sentiment ?? null,
+              sentiment: targetAnalysis?.sentiment != null ? Math.max(-1, Math.min(1, Number(targetAnalysis.sentiment) || 0)) : null,
               tokens: action.tokens,
             },
           });
@@ -170,7 +170,7 @@ export function startAgentLoopWorker() {
             content,
             type: tweetType,
             replyToTweetId: action.targetTweetId,
-            sentiment: targetAnalysis?.sentiment ?? null,
+            sentiment: targetAnalysis?.sentiment != null ? Math.max(-1, Math.min(1, Number(targetAnalysis.sentiment) || 0)) : null,
             tokens: action.tokens,
           },
         });

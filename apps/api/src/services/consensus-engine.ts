@@ -15,9 +15,16 @@ export class ConsensusEngine {
     // Check for recent events to avoid duplicates (within last analysis period)
     const recentEvents = await prisma.consensusEvent.findMany({
       where: { timestamp: { gte: since } },
-      select: { token: true, type: true },
+      select: { token: true, type: true, avgSentiment: true },
     });
-    const recentEventKeys = new Set(recentEvents.map((e) => `${e.token}:${e.type}`));
+    // Use direction-aware keys for AGREEMENT (bullish vs bearish are distinct events)
+    const recentEventKeys = new Set(recentEvents.map((e) => {
+      if (e.type === 'AGREEMENT') {
+        const dir = e.avgSentiment >= 0 ? 'BULL' : 'BEAR';
+        return `${e.token}:AGREEMENT:${dir}`;
+      }
+      return `${e.token}:${e.type}`;
+    }));
 
     const events: ConsensusEvent[] = [];
 
@@ -54,7 +61,7 @@ export class ConsensusEngine {
       const bullRatio = bullish / total;
       const bearRatio = bearish / total;
 
-      if (bullRatio >= CONSENSUS_THRESHOLDS.AGREEMENT_RATIO && !recentEventKeys.has(`${token}:AGREEMENT`)) {
+      if (bullRatio >= CONSENSUS_THRESHOLDS.AGREEMENT_RATIO && !recentEventKeys.has(`${token}:AGREEMENT:BULL`)) {
         const event = await this.createEvent(token, 'AGREEMENT', avgStance, total,
           `${(bullRatio * 100).toFixed(0)}% of agents are bullish on $${token}. Average sentiment: ${avgStance.toFixed(2)}`
         );
@@ -62,7 +69,7 @@ export class ConsensusEngine {
         continue;
       }
 
-      if (bearRatio >= CONSENSUS_THRESHOLDS.AGREEMENT_RATIO && !recentEventKeys.has(`${token}:AGREEMENT`)) {
+      if (bearRatio >= CONSENSUS_THRESHOLDS.AGREEMENT_RATIO && !recentEventKeys.has(`${token}:AGREEMENT:BEAR`)) {
         const event = await this.createEvent(token, 'AGREEMENT', avgStance, total,
           `${(bearRatio * 100).toFixed(0)}% of agents are bearish on $${token}. Average sentiment: ${avgStance.toFixed(2)}`
         );

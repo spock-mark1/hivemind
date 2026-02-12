@@ -38,10 +38,17 @@ export default function NetworkGraph({ interactions }: Props) {
   }, []);
 
   useEffect(() => {
-    if (containerRef.current) {
-      const { clientWidth, clientHeight } = containerRef.current;
-      setDimensions({ width: clientWidth, height: Math.max(clientHeight, 350) });
-    }
+    const el = containerRef.current;
+    if (!el) return;
+
+    const update = () => {
+      setDimensions({ width: el.clientWidth, height: Math.max(el.clientHeight, 350) });
+    };
+    update();
+
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   const graphData = useMemo(() => {

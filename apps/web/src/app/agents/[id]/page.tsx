@@ -39,6 +39,7 @@ interface AgentDetail {
 export default function AgentDetailPage() {
   const params = useParams();
   const [agent, setAgent] = useState<AgentDetail | null>(null);
+  const [loadError, setLoadError] = useState(false);
   const [sessionStatus, setSessionStatus] = useState<'none' | 'active' | 'uploading' | 'error'>('none');
   const [sessionError, setSessionError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -50,6 +51,7 @@ export default function AgentDetailPage() {
         setSessionStatus(data.sessionData ? 'active' : 'none');
       }).catch((err) => {
         console.error('Failed to load agent:', err);
+        setLoadError(true);
       });
     }
   }, [params.id]);
@@ -104,6 +106,15 @@ export default function AgentDetailPage() {
       alert(err.message);
     }
   };
+
+  if (loadError) {
+    return (
+      <div className="min-h-screen p-6 flex flex-col items-center justify-center gap-3">
+        <p className="text-hive-bear font-semibold">Failed to load agent</p>
+        <a href="/agents" className="text-sm text-hive-accent hover:underline">Back to Agents</a>
+      </div>
+    );
+  }
 
   if (!agent) {
     return <div className="min-h-screen p-6 flex items-center justify-center text-gray-400">Loading...</div>;

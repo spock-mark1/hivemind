@@ -6,9 +6,15 @@ import { useSocket } from '@/hooks/use-socket';
 import ConsensusTimeline from '@/components/consensus-timeline';
 import type { ConsensusEvent } from '@selanet/shared';
 
+interface TokenSentiment {
+  token: string;
+  avgSentiment: number;
+  participantCount: number;
+}
+
 export default function ConsensusPage() {
   const [events, setEvents] = useState<ConsensusEvent[]>([]);
-  const [sentiments, setSentiments] = useState<any[]>([]);
+  const [sentiments, setSentiments] = useState<TokenSentiment[]>([]);
   const { subscribe } = useSocket();
 
   useEffect(() => {
@@ -34,7 +40,7 @@ export default function ConsensusPage() {
       <div className="card mb-6">
         <h2 className="text-sm font-semibold text-gray-300 mb-4">Token Sentiment Spectrum</h2>
         <div className="space-y-4">
-          {sentiments.map((s: any) => (
+          {sentiments.map((s) => (
             <div key={s.token} className="flex items-center gap-4">
               <span className="w-12 text-sm font-semibold">${s.token}</span>
               <div className="flex-1 relative h-6 bg-gradient-to-r from-hive-bear/30 via-gray-700 to-hive-bull/30 rounded-full overflow-hidden">

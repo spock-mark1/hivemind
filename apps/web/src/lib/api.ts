@@ -1,4 +1,5 @@
 import { API_BASE_URL } from '@selanet/shared';
+import type { ConsensusEvent } from '@selanet/shared';
 
 function getToken(): string | null {
   if (typeof window === 'undefined') return null;
@@ -34,6 +35,77 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
   return res.json();
 }
 
+interface AgentSummary {
+  id: string;
+  name: string;
+  persona: string;
+  status: string;
+  twitterHandle: string;
+}
+
+interface AgentListItem extends AgentSummary {
+  strategy: string;
+  createdAt: string;
+  _count: { tweets: number; opinions: number };
+}
+
+interface AgentDetail extends AgentSummary {
+  strategy: string;
+  sessionData?: boolean | null;
+  createdAt: string;
+  tweets: { id: string; content: string; type: string; tweetId?: string | null; sentiment?: number | null; postedAt: string }[];
+  opinions: { id: string; token: string; stance: number; confidence: number; reasoning: string; createdAt: string }[];
+}
+
+interface MarketPrice {
+  token: string;
+  price: number;
+  priceChange24h: number;
+  volume24h: number;
+  tvl?: number | null;
+  timestamp: string;
+}
+
+interface DashboardStats {
+  totalAgents: number;
+  activeAgents: number;
+  totalTweets: number;
+  totalOpinions: number;
+  consensusEvents: number;
+}
+
+interface FeedItem {
+  id: string;
+  agentId: string;
+  agentName: string;
+  content: string;
+  type: string;
+  tweetId?: string | null;
+  sentiment?: number | null;
+  tokens: string[];
+  postedAt: string;
+}
+
+interface Interaction {
+  sourceAgentId: string;
+  targetAgentId: string;
+  type: string;
+  sentiment: number | null;
+  postedAt: string;
+}
+
+interface TokenSentiment {
+  token: string;
+  avgSentiment: number;
+  participantCount: number;
+}
+
+interface SentimentHistoryPoint {
+  timestamp: string;
+  avgStance: number;
+  count: number;
+}
+
 export const api = {
   // Auth
   register: (email: string, password: string) =>
@@ -48,15 +120,15 @@ export const api = {
     }),
 
   // Agents
-  getAgents: () => fetchAPI<any[]>('/api/agents'),
-  getAllAgents: () => fetchAPI<any[]>('/api/agents/all'),
-  getAgent: (id: string) => fetchAPI<any>(`/api/agents/${id}`),
-  createAgent: (data: any) =>
-    fetchAPI<any>('/api/agents', { method: 'POST', body: JSON.stringify(data) }),
+  getAgents: () => fetchAPI<AgentListItem[]>('/api/agents'),
+  getAllAgents: () => fetchAPI<AgentSummary[]>('/api/agents/all'),
+  getAgent: (id: string) => fetchAPI<AgentDetail>(`/api/agents/${id}`),
+  createAgent: (data: { name: string; persona: string; strategy: string; twitterHandle: string }) =>
+    fetchAPI<AgentListItem>('/api/agents', { method: 'POST', body: JSON.stringify(data) }),
   updateAgentStatus: (id: string, status: string) =>
-    fetchAPI<any>(`/api/agents/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+    fetchAPI<{ id: string; status: string }>(`/api/agents/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   deleteAgent: (id: string) =>
-    fetchAPI<any>(`/api/agents/${id}`, { method: 'DELETE' }),
+    fetchAPI<{ success: boolean }>(`/api/agents/${id}`, { method: 'DELETE' }),
 
   // Twitter session
   uploadSession: (agentId: string, sessionData: string) =>
@@ -68,16 +140,16 @@ export const api = {
     fetchAPI<{ success: boolean }>(`/api/agents/${agentId}/session`, { method: 'DELETE' }),
 
   // Market
-  getPrices: () => fetchAPI<any[]>('/api/market/prices'),
+  getPrices: () => fetchAPI<MarketPrice[]>('/api/market/prices'),
   getPriceHistory: (token: string, hours = 24) =>
-    fetchAPI<any[]>(`/api/market/history/${token}?hours=${hours}`),
+    fetchAPI<MarketPrice[]>(`/api/market/history/${token}?hours=${hours}`),
 
   // Dashboard
-  getStats: () => fetchAPI<any>('/api/dashboard/stats'),
-  getFeed: (limit = 30) => fetchAPI<any[]>(`/api/dashboard/feed?limit=${limit}`),
-  getInteractions: () => fetchAPI<any[]>('/api/dashboard/interactions'),
-  getConsensus: () => fetchAPI<any[]>('/api/dashboard/consensus'),
-  getSentiments: () => fetchAPI<any[]>('/api/dashboard/sentiments'),
+  getStats: () => fetchAPI<DashboardStats>('/api/dashboard/stats'),
+  getFeed: (limit = 30) => fetchAPI<FeedItem[]>(`/api/dashboard/feed?limit=${limit}`),
+  getInteractions: () => fetchAPI<Interaction[]>('/api/dashboard/interactions'),
+  getConsensus: () => fetchAPI<ConsensusEvent[]>('/api/dashboard/consensus'),
+  getSentiments: () => fetchAPI<TokenSentiment[]>('/api/dashboard/sentiments'),
   getSentimentHistory: (token: string, hours = 24) =>
-    fetchAPI<any[]>(`/api/dashboard/sentiment-history/${token}?hours=${hours}`),
+    fetchAPI<SentimentHistoryPoint[]>(`/api/dashboard/sentiment-history/${token}?hours=${hours}`),
 };

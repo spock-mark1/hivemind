@@ -130,8 +130,8 @@ export class TwitterBrowser {
     } catch (error: any) {
       return { tweetId: null, success: false, error: error.message };
     } finally {
-      await page.close();
-      await context.close();
+      try { await page.close(); } catch {}
+      try { await context.close(); } catch {}
     }
   }
 
@@ -170,8 +170,8 @@ export class TwitterBrowser {
     } catch (error: any) {
       return { tweetId: null, success: false, error: error.message };
     } finally {
-      await page.close();
-      await context.close();
+      try { await page.close(); } catch {}
+      try { await context.close(); } catch {}
     }
   }
 
@@ -211,8 +211,8 @@ export class TwitterBrowser {
     } catch (error: any) {
       return { tweetId: null, success: false, error: error.message };
     } finally {
-      await page.close();
-      await context.close();
+      try { await page.close(); } catch {}
+      try { await context.close(); } catch {}
     }
   }
 
@@ -260,8 +260,8 @@ export class TwitterBrowser {
     } catch (error) {
       console.error('Timeline scan failed:', error);
     } finally {
-      await page.close();
-      await context.close();
+      try { await page.close(); } catch {}
+      try { await context.close(); } catch {}
     }
 
     return tweets;
@@ -303,8 +303,8 @@ export class TwitterBrowser {
     } catch (error) {
       console.error('Mentions scan failed:', error);
     } finally {
-      await page.close();
-      await context.close();
+      try { await page.close(); } catch {}
+      try { await context.close(); } catch {}
     }
 
     return tweets;

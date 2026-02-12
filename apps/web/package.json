@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@selanet/shared": "*",
+    "@selanet/shared": "workspace:*",
     "d3": "^7.9.0",
     "next": "^14.2.18",
     "react": "^18.3.1",

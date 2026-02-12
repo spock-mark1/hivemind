@@ -655,20 +655,20 @@ NEXT_PUBLIC_WS_URL    # 프론트엔드 WebSocket URL
 
 ```bash
 # 1. 의존성 설치
-npm install
+pnpm install
 
 # 2. 인프라 시작
 docker compose up -d
 
 # 3. DB 마이그레이션
-npm run db:push
+pnpm db:push
 
 # 4. 환경 변수 설정
 cp .env.example .env
 # .env 파일에 ANTHROPIC_API_KEY 등 설정
 
 # 5. 개발 서버 시작
-npm run dev
+pnpm dev
 # API: http://localhost:3001
 # Web: http://localhost:3000
 ```

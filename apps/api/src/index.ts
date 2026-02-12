@@ -41,7 +41,7 @@ async function main() {
   await app.register(marketRoutes, { prefix: '/api/market' });
 
   // Consistent error handler for Zod validation errors
-  app.setErrorHandler((error, _request, reply) => {
+  app.setErrorHandler((error: Error & { statusCode?: number }, _request, reply) => {
     if (error instanceof ZodError) {
       return reply.status(400).send({
         error: error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '),
@@ -74,11 +74,10 @@ async function main() {
     await app.close();
     for (const w of workers) {
       try {
-        if (w && typeof w === 'object') {
-          if ('worker' in w && w.worker) await w.worker.close();
-          if ('queue' in w && w.queue) await w.queue.close();
-          if ('connection' in w && w.connection) await w.connection.quit();
-        }
+        const handle = w as { worker?: { close(): Promise<void> }; queue?: { close(): Promise<void> }; connection?: { quit(): Promise<string> } };
+        if (handle.worker) await handle.worker.close();
+        if (handle.queue) await handle.queue.close();
+        if (handle.connection) await handle.connection.quit();
       } catch (err) {
         console.error('Error closing worker:', err);
       }

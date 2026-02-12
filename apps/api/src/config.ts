@@ -3,7 +3,7 @@ import { z } from 'zod';
 const envSchema = z.object({
   DATABASE_URL: z.string(),
   REDIS_URL: z.string().default('redis://localhost:6379'),
-  ANTHROPIC_API_KEY: z.string(),
+  GEMINI_API_KEY: z.string(),
   COINGECKO_API_KEY: z.string().default(''),
   SELANET_API_URL: z.string().default('https://api.selanet.io'),
   SELANET_API_KEY: z.string().default(''),

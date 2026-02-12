@@ -18,7 +18,7 @@ export class ConsensusEngine {
       select: { token: true, type: true, avgSentiment: true },
     });
     // Use direction-aware keys for AGREEMENT (bullish vs bearish are distinct events)
-    const recentEventKeys = new Set(recentEvents.map((e) => {
+    const recentEventKeys = new Set(recentEvents.map((e: typeof recentEvents[number]) => {
       if (e.type === 'AGREEMENT') {
         const dir = e.avgSentiment >= 0 ? 'BULL' : 'BEAR';
         return `${e.token}:AGREEMENT:${dir}`;

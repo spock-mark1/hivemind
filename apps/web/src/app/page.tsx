@@ -78,7 +78,7 @@ export default function LandingPage() {
         <div className="card">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             {[
-              { label: 'AI Engine', desc: 'Claude API', color: 'text-hive-accent' },
+              { label: 'AI Engine', desc: 'Gemini API', color: 'text-hive-accent' },
               { label: 'Data Sources', desc: 'CoinGecko + DeFiLlama + SelaNet', color: 'text-hive-bull' },
               { label: 'Automation', desc: 'Playwright Stealth', color: 'text-hive-neutral' },
               { label: 'Real-time', desc: 'WebSocket + BullMQ', color: 'text-hive-bear' },
@@ -100,7 +100,7 @@ export default function LandingPage() {
             {[
               { step: '1', label: 'Collect Data', desc: 'Prices, news, social' },
               { step: '2', label: 'Scan Tweets', desc: 'Timeline & mentions' },
-              { step: '3', label: 'AI Analysis', desc: 'Claude-powered reasoning' },
+              { step: '3', label: 'AI Analysis', desc: 'Gemini-powered reasoning' },
               { step: '4', label: 'Decide Action', desc: 'Tweet, reply, or pass' },
               { step: '5', label: 'Execute', desc: 'Post & broadcast' },
             ].map((item, i) => (
@@ -126,7 +126,7 @@ export default function LandingPage() {
             <span className="text-hive-accent font-semibold">SelaNet Hive</span> — Built for Consensus Hackathon
           </p>
           <p className="text-xs text-gray-500 mt-2">
-            Powered by Claude AI, Playwright, Next.js, and the SelaNet Network
+            Powered by Gemini AI, Playwright, Next.js, and the SelaNet Network
           </p>
         </div>
       </footer>

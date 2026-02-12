@@ -45,8 +45,8 @@ export const dashboardRoutes: FastifyPluginAsync = async (app) => {
 
     // Collect all referenced tweetIds to look up their authors
     const replyToIds = replyTweets
-      .map((t) => t.replyToTweetId)
-      .filter((id): id is string => id !== null);
+      .map((t: typeof replyTweets[number]) => t.replyToTweetId)
+      .filter((id: string | null): id is string => id !== null);
 
     // Find which agent authored each original tweet
     const originalTweets = await prisma.tweet.findMany({
@@ -71,21 +71,21 @@ export const dashboardRoutes: FastifyPluginAsync = async (app) => {
     }
 
     // Build resolved edges
-    const edges = replyTweets
-      .map((t) => {
-        const targetAgentId = t.replyToTweetId
-          ? tweetToAgent.get(t.replyToTweetId)
-          : undefined;
-        if (!targetAgentId || targetAgentId === t.agentId) return null;
-        return {
-          sourceAgentId: t.agentId,
-          targetAgentId,
-          type: t.type,
-          sentiment: t.sentiment,
-          postedAt: t.postedAt,
-        };
-      })
-      .filter((e): e is NonNullable<typeof e> => e !== null);
+    type ReplyTweet = typeof replyTweets[number];
+    const mapped = replyTweets.map((t: ReplyTweet) => {
+      const targetAgentId = t.replyToTweetId
+        ? tweetToAgent.get(t.replyToTweetId)
+        : undefined;
+      if (!targetAgentId || targetAgentId === t.agentId) return null;
+      return {
+        sourceAgentId: t.agentId,
+        targetAgentId,
+        type: t.type,
+        sentiment: t.sentiment,
+        postedAt: t.postedAt,
+      };
+    });
+    const edges = mapped.filter((e: typeof mapped[number]): e is NonNullable<typeof e> => e !== null);
 
     return edges;
   });

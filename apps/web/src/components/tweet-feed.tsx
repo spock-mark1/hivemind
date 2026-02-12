@@ -26,11 +26,19 @@ export default function TweetFeed() {
   }, []);
 
   useEffect(() => {
+    const toFeedTweet = (tweet: TweetData): FeedTweet => ({
+      id: tweet.id,
+      content: tweet.content,
+      type: tweet.type,
+      tokens: tweet.tokens,
+      postedAt: String(tweet.postedAt),
+      authorHandle: tweet.authorHandle,
+    });
     const unsub1 = subscribe('agent:tweet', (tweet) => {
-      setTweets((prev) => [tweet, ...prev].slice(0, 50));
+      setTweets((prev) => [toFeedTweet(tweet), ...prev].slice(0, 50));
     });
     const unsub2 = subscribe('agent:reply', (tweet) => {
-      setTweets((prev) => [tweet, ...prev].slice(0, 50));
+      setTweets((prev) => [toFeedTweet(tweet), ...prev].slice(0, 50));
     });
     return () => { unsub1(); unsub2(); };
   }, [subscribe]);

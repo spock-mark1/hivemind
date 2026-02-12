@@ -1,4 +1,4 @@
-import { askClaude, askClaudeJSON } from './claude-client.js';
+import { askGemini, askGeminiJSON } from './gemini-client.js';
 import { buildAnalystPrompt, buildMarketDataContext } from './prompts/analyst.js';
 import { buildTweeterPrompt, buildReplyPrompt, buildQuotePrompt } from './prompts/tweeter.js';
 import { buildDebaterPrompt } from './prompts/debater.js';
@@ -33,7 +33,7 @@ export class AgentBrain {
 
     const prompt = `${marketContext}${newsContext}${currentOpinions}\n\nAnalyze the top 3-5 tokens you have the strongest opinion about. Return a JSON array of analyses.`;
 
-    return askClaudeJSON<MarketAnalysis[]>(systemPrompt, [{ role: 'user', content: prompt }], {
+    return askGeminiJSON<MarketAnalysis[]>(systemPrompt, [{ role: 'user', content: prompt }], {
       maxTokens: 2048,
       temperature: 0.7,
     });
@@ -50,7 +50,7 @@ export class AgentBrain {
       .map((t) => `[${t.id}] @${t.authorHandle}: "${t.content}" (sentiment: ${t.sentiment?.toFixed(2) ?? 'unknown'})`)
       .join('\n');
 
-    return askClaudeJSON<TweetEvaluation[]>(systemPrompt, [
+    return askGeminiJSON<TweetEvaluation[]>(systemPrompt, [
       { role: 'user', content: `Evaluate these tweets:\n\n${tweetContext}` },
     ], { maxTokens: 1024 });
   }
@@ -118,7 +118,7 @@ export class AgentBrain {
         break;
     }
 
-    const content = await askClaude(systemPrompt, [{ role: 'user', content: userMessage }], {
+    const content = await askGemini(systemPrompt, [{ role: 'user', content: userMessage }], {
       maxTokens: 256,
       temperature: 0.8,
     });

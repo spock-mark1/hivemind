@@ -62,15 +62,14 @@ interface MarketPrice {
   price: number;
   priceChange24h: number;
   volume24h: number;
-  tvl?: number | null;
+  tvl?: number;
   timestamp: string;
 }
 
 interface DashboardStats {
-  totalAgents: number;
+  agentCount: number;
   activeAgents: number;
-  totalTweets: number;
-  totalOpinions: number;
+  tweetCount: number;
   consensusEvents: number;
 }
 
@@ -98,11 +97,12 @@ interface TokenSentiment {
   token: string;
   avgSentiment: number;
   participantCount: number;
+  agents: string[];
 }
 
 interface SentimentHistoryPoint {
   timestamp: string;
-  avgStance: number;
+  avgSentiment: number;
   count: number;
 }
 

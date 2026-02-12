@@ -273,7 +273,7 @@ export default function AgentDetailPage() {
                   {!tweet.tweetId && (
                     <span className="text-gray-500 italic">draft</span>
                   )}
-                  {tweet.sentiment !== null && (
+                  {tweet.sentiment != null && (
                     <span>{sentimentLabel(tweet.sentiment)}</span>
                   )}
                   <span>{new Date(tweet.postedAt).toLocaleString()}</span>

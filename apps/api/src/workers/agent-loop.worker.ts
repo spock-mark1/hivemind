@@ -43,7 +43,7 @@ export function startAgentLoopWorker() {
         const context: MarketContext = {
           prices,
           recentTweets: [],
-          currentOpinions: agent.opinions.map((o) => ({
+          currentOpinions: agent.opinions.map((o: typeof agent.opinions[number]) => ({
             id: o.id,
             agentId: o.agentId,
             token: o.token,

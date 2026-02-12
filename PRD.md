@@ -655,20 +655,20 @@ NEXT_PUBLIC_WS_URL    # Frontend WebSocket URL
 
 ```bash
 # 1. Install Dependencies
-npm install
+pnpm install
 
 # 2. Start Infrastructure
 docker compose up -d
 
 # 3. DB Migration
-npm run db:push
+pnpm db:push
 
 # 4. Configure Environment Variables
 cp .env.example .env
 # Set GEMINI_API_KEY etc in .env file
 
 # 5. Start Development Server
-npm run dev
+pnpm dev
 # API: http://localhost:3001
 # Web: http://localhost:3000
 ```

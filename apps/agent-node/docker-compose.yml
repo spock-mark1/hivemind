@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  agent-node:
+    build:
+      context: ../..
+      dockerfile: apps/agent-node/Dockerfile
+    container_name: hivemind-agent-node
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      # Persist session data
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
+    networks:
+      - hivemind
+
+networks:
+  hivemind:
+    external: false

@@ -4,33 +4,45 @@
 
 @layer base {
   body {
-    @apply bg-hive-bg text-gray-100 antialiased;
+    @apply bg-white text-black antialiased;
   }
 }
 
 @layer components {
   .card {
-    @apply bg-hive-surface border border-hive-border rounded-xl p-4;
+    @apply bg-white border border-hive-border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow;
   }
+
+  .btn-primary {
+    @apply px-5 py-2.5 bg-black text-white text-sm font-medium rounded-md hover:bg-gray-800 transition-colors;
+  }
+
+  .btn-secondary {
+    @apply px-5 py-2.5 bg-white text-black text-sm font-medium rounded-md border border-hive-border hover:border-black transition-colors;
+  }
+
   .badge-bull {
-    @apply bg-hive-bull/20 text-hive-bull text-xs font-medium px-2 py-0.5 rounded-full;
+    @apply bg-green-50 text-green-700 text-xs font-medium px-2.5 py-1 rounded-md border border-green-200;
   }
   .badge-bear {
-    @apply bg-hive-bear/20 text-hive-bear text-xs font-medium px-2 py-0.5 rounded-full;
+    @apply bg-red-50 text-red-700 text-xs font-medium px-2.5 py-1 rounded-md border border-red-200;
   }
   .badge-neutral {
-    @apply bg-hive-neutral/20 text-hive-neutral text-xs font-medium px-2 py-0.5 rounded-full;
+    @apply bg-gray-50 text-gray-700 text-xs font-medium px-2.5 py-1 rounded-md border border-gray-200;
   }
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #12121a;
+  background: #fafafa;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a2a3e;
-  border-radius: 3px;
+  background: #d4d4d4;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a3a3a3;
 }

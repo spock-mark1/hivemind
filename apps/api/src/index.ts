@@ -8,9 +8,8 @@ import { authRoutes } from './routes/auth.js';
 import { agentRoutes } from './routes/agents.js';
 import { dashboardRoutes } from './routes/dashboard.js';
 import { marketRoutes } from './routes/market.js';
+import { registryRoutes } from './routes/registry.js';
 import { startMarketPollWorker } from './workers/market-poll.worker.js';
-import { startAgentLoopWorker } from './workers/agent-loop.worker.js';
-import { startTweetScanWorker } from './workers/tweet-scan.worker.js';
 import { startConsensusWorker } from './workers/consensus.worker.js';
 
 async function main() {
@@ -39,6 +38,7 @@ async function main() {
   await app.register(agentRoutes, { prefix: '/api/agents' });
   await app.register(dashboardRoutes, { prefix: '/api/dashboard' });
   await app.register(marketRoutes, { prefix: '/api/market' });
+  await app.register(registryRoutes);
 
   // Consistent error handler for Zod validation errors
   app.setErrorHandler((error: Error & { statusCode?: number }, _request, reply) => {
@@ -61,12 +61,10 @@ async function main() {
 
   // Start background workers
   const workers = [
-    startMarketPollWorker(),
-    startAgentLoopWorker(),
-    startTweetScanWorker(),
-    startConsensusWorker(),
+    startMarketPollWorker(),    // Hub collects market data
+    startConsensusWorker(),     // Hub calculates consensus
   ];
-  app.log.info('All background workers started');
+  app.log.info('Hub background workers started (market-poll, consensus)');
 
   // Graceful shutdown
   const shutdown = async (signal: string) => {

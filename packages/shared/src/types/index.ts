@@ -97,3 +97,37 @@ export interface WSEvents {
   'consensus:event': ConsensusEvent;
   'market:update': MarketData;
 }
+
+// ------------------------------------------------------------------
+// Hive Network Protocol (Agent Node <-> Central Hive)
+// ------------------------------------------------------------------
+
+export interface AgentRegistrationPayload {
+  name: string;
+  persona: string; // 'BULL' | 'BEAR' | 'DEGEN' | 'MACRO'
+  description?: string;
+  twitterHandle: string;
+  walletAddress?: string; // Optional: for future rewards
+}
+
+export interface AgentHeartbeatPayload {
+  agentId: string;
+  status: AgentStatus;
+  timestamp: Date;
+  metadata?: Record<string, any>;
+}
+
+export type ActivityType = 'TWEET' | 'REPLY' | 'QUOTE' | 'OPINION' | 'MARKET_ANALYSIS';
+
+export interface AgentActivityPayload {
+  agentId: string;
+  type: ActivityType;
+  timestamp: Date;
+  data: TweetData | Opinion | MarketAnalysis | any;
+}
+
+export interface HiveApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}

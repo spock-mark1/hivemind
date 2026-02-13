@@ -1,31 +1,15 @@
 import { FastifyPluginAsync } from 'fastify';
-import { z } from 'zod';
 import { prisma } from '@selanet/db';
-import { authenticate } from '../plugins/auth.js';
-import { agentOrchestrator } from '../services/agent-orchestrator.js';
-
-const createAgentSchema = z.object({
-  name: z.string().min(1),
-  persona: z.string().min(1),
-  strategy: z.string().min(1).max(5000),
-  twitterHandle: z.string().min(1).max(50),
-});
 
 export const agentRoutes: FastifyPluginAsync = async (app) => {
-  // All agent routes require authentication
-  app.addHook('preHandler', authenticate);
-
-  // List current user's agents
-  app.get('/', async (request) => {
-    return prisma.agent.findMany({
-      where: { userId: request.userId },
-      include: { _count: { select: { tweets: true, opinions: true } } },
-      orderBy: { createdAt: 'desc' },
-    });
-  });
-
-  // List all agents (public, for dashboard/network graph — no strategy exposed)
-  app.get('/all', async () => {
+  /**
+   * GET /api/agents
+   * List all agents (public, for dashboard)
+   *
+   * NOTE: In distributed architecture, agents are managed by Agent Nodes.
+   * This endpoint is read-only for dashboard visualization.
+   */
+  app.get('/', async () => {
     const agents = await prisma.agent.findMany({
       select: {
         id: true,
@@ -33,6 +17,8 @@ export const agentRoutes: FastifyPluginAsync = async (app) => {
         persona: true,
         twitterHandle: true,
         status: true,
+        lastHeartbeat: true,
+        updatedAt: true,
         createdAt: true,
         _count: { select: { tweets: true, opinions: true } },
       },
@@ -41,107 +27,38 @@ export const agentRoutes: FastifyPluginAsync = async (app) => {
     return agents;
   });
 
-  // Get agent by ID (own agent: full detail; other agent: public detail)
+  /**
+   * GET /api/agents/:id
+   * Get agent details by ID (public)
+   */
   app.get<{ Params: { id: string } }>('/:id', async (request, reply) => {
     const agent = await prisma.agent.findUnique({
       where: { id: request.params.id },
-      include: {
-        tweets: { orderBy: { postedAt: 'desc' }, take: 50 },
-        opinions: { orderBy: { createdAt: 'desc' }, take: 20 },
+      select: {
+        id: true,
+        name: true,
+        persona: true,
+        strategy: true,
+        twitterHandle: true,
+        status: true,
+        lastHeartbeat: true,
+        updatedAt: true,
+        createdAt: true,
+        tweets: {
+          orderBy: { postedAt: 'desc' },
+          take: 50,
+        },
+        opinions: {
+          orderBy: { createdAt: 'desc' },
+          take: 20,
+        },
       },
     });
-    if (!agent) return reply.status(404).send({ error: 'Agent not found' });
-    // Strip sessionData for non-owners
-    if (agent.userId !== request.userId) {
-      return { ...agent, sessionData: undefined };
+
+    if (!agent) {
+      return reply.status(404).send({ error: 'Agent not found' });
     }
+
     return agent;
-  });
-
-  // Create agent (scoped to authenticated user)
-  app.post('/', async (request) => {
-    const body = createAgentSchema.parse(request.body);
-    return prisma.agent.create({
-      data: {
-        ...body,
-        userId: request.userId!,
-      },
-    });
-  });
-
-  // Upload Twitter session data
-  app.put<{ Params: { id: string } }>('/:id/session', async (request, reply) => {
-    const agent = await prisma.agent.findUnique({ where: { id: request.params.id } });
-    if (!agent) return reply.status(404).send({ error: 'Agent not found' });
-    if (agent.userId !== request.userId) {
-      return reply.status(403).send({ error: 'Not your agent' });
-    }
-
-    const { sessionData } = z.object({
-      sessionData: z.string().min(1),
-    }).parse(request.body);
-
-    // sessionData is a JSON string of Playwright storageState
-    const buffer = Buffer.from(sessionData, 'utf-8');
-    const updated = await prisma.agent.update({
-      where: { id: agent.id },
-      data: { sessionData: buffer },
-    });
-
-    return { success: true, hasSession: true };
-  });
-
-  // Delete Twitter session data
-  app.delete<{ Params: { id: string } }>('/:id/session', async (request, reply) => {
-    const agent = await prisma.agent.findUnique({ where: { id: request.params.id } });
-    if (!agent) return reply.status(404).send({ error: 'Agent not found' });
-    if (agent.userId !== request.userId) {
-      return reply.status(403).send({ error: 'Not your agent' });
-    }
-
-    await prisma.agent.update({
-      where: { id: agent.id },
-      data: { sessionData: null },
-    });
-
-    return { success: true, hasSession: false };
-  });
-
-  // Update agent status (owner only) — triggers orchestrator start/stop/pause
-  app.patch<{ Params: { id: string } }>('/:id/status', async (request, reply) => {
-    const { status } = z.object({ status: z.enum(['IDLE', 'RUNNING', 'PAUSED']) }).parse(request.body);
-    const agent = await prisma.agent.findUnique({ where: { id: request.params.id } });
-    if (!agent) return reply.status(404).send({ error: 'Agent not found' });
-    if (agent.userId !== request.userId) {
-      return reply.status(403).send({ error: 'Not your agent' });
-    }
-
-    switch (status) {
-      case 'RUNNING':
-        await agentOrchestrator.startAgent(agent.id);
-        break;
-      case 'PAUSED':
-        await agentOrchestrator.pauseAgent(agent.id);
-        break;
-      case 'IDLE':
-        await agentOrchestrator.stopAgent(agent.id);
-        break;
-    }
-
-    const updated = await prisma.agent.findUnique({ where: { id: agent.id } });
-    return updated;
-  });
-
-  // Delete agent (owner only, cascade)
-  app.delete<{ Params: { id: string } }>('/:id', async (request, reply) => {
-    const agent = await prisma.agent.findUnique({ where: { id: request.params.id } });
-    if (!agent) return reply.status(404).send({ error: 'Agent not found' });
-    if (agent.userId !== request.userId) {
-      return reply.status(403).send({ error: 'Not your agent' });
-    }
-    await prisma.tweet.deleteMany({ where: { agentId: agent.id } });
-    await prisma.opinion.deleteMany({ where: { agentId: agent.id } });
-    await prisma.agent.delete({ where: { id: agent.id } });
-    return { success: true };
   });
 };

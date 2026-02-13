@@ -1,7 +1,7 @@
-import { askGemini, askGeminiJSON } from './gemini-client.js';
-import { buildAnalystPrompt, buildMarketDataContext } from './prompts/analyst.js';
-import { buildTweeterPrompt, buildReplyPrompt, buildQuotePrompt } from './prompts/tweeter.js';
-import { buildDebaterPrompt } from './prompts/debater.js';
+import { askGemini, askGeminiJSON } from '../ai/gemini-client.js';
+import { buildAnalystPrompt, buildMarketDataContext } from '../ai/prompts/analyst.js';
+import { buildTweeterPrompt, buildReplyPrompt, buildQuotePrompt } from '../ai/prompts/tweeter.js';
+import { buildDebaterPrompt } from '../ai/prompts/debater.js';
 import type {
   MarketContext,
   MarketAnalysis,

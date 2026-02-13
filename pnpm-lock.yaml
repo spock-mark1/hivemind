@@ -15,6 +15,43 @@ importers:
         specifier: ^5.6.3
         version: 5.9.3
 
+  apps/agent-node:
+    dependencies:
+      '@google/generative-ai':
+        specifier: ^0.21.0
+        version: 0.21.0
+      '@selanet/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      axios:
+        specifier: ^1.7.9
+        version: 1.13.5
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.6.1
+      playwright:
+        specifier: ^1.49.1
+        version: 1.58.2
+      playwright-extra:
+        specifier: ^4.3.6
+        version: 4.3.6(playwright-core@1.58.2)(playwright@1.58.2)
+      puppeteer-extra-plugin-stealth:
+        specifier: ^2.11.2
+        version: 2.11.2(playwright-extra@4.3.6(playwright-core@1.58.2)(playwright@1.58.2))
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.1
+        version: 22.19.11
+      tsx:
+        specifier: ^4.19.2
+        version: 4.21.0
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.3
+
   apps/api:
     dependencies:
       '@fastify/cors':
@@ -23,9 +60,6 @@ importers:
       '@fastify/websocket':
         specifier: ^11.0.1
         version: 11.2.0
-      '@google/generative-ai':
-        specifier: ^0.21.0
-        version: 0.21.0
       '@selanet/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -50,15 +84,6 @@ importers:
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.3
-      playwright:
-        specifier: ^1.49.1
-        version: 1.58.2
-      playwright-extra:
-        specifier: ^4.3.6
-        version: 4.3.6(playwright-core@1.58.2)(playwright@1.58.2)
-      puppeteer-extra-plugin-stealth:
-        specifier: ^2.11.2
-        version: 2.11.2(playwright-extra@4.3.6(playwright-core@1.58.2)(playwright@1.58.2))
       socket.io:
         specifier: ^4.8.1
         version: 4.8.3
@@ -978,6 +1003,10 @@ packages:
 
   dom-helpers@5.2.1:
     resolution: {integrity: sha512-nRCa7CK3VTrM2NmGkIy4cbK7IZlgBE/PYMn55rrXefr5xXDP0LdtfPnblFDoVdcAfslJ7or6iqAUnx0CCGIWQA==}
+
+  dotenv@16.6.1:
+    resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
+    engines: {node: '>=12'}
 
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
@@ -2734,6 +2763,8 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.28.6
       csstype: 3.2.3
+
+  dotenv@16.6.1: {}
 
   dunder-proto@1.0.1:
     dependencies:

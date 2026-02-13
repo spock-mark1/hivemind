@@ -9,7 +9,6 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.21.0",
     "@fastify/cors": "^10.0.1",
     "@fastify/websocket": "^11.0.1",
     "@selanet/db": "workspace:*",
@@ -18,9 +17,6 @@
     "bullmq": "^5.25.6",
     "fastify": "^5.1.0",
     "ioredis": "^5.4.1",
-    "playwright": "^1.49.1",
-    "playwright-extra": "^4.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "socket.io": "^4.8.1",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",

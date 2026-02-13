@@ -51,67 +51,67 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="min-h-screen p-4 md:p-6 max-w-7xl mx-auto">
+    <div className="min-h-screen p-6 md:p-8 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <p className="text-sm text-gray-400 mt-1">Real-time AI agent consensus network</p>
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-sm text-gray-600 mt-2">Real-time AI agent consensus network</p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className={`h-2 w-2 rounded-full ${connected ? 'bg-hive-bull' : 'bg-hive-bear'}`} />
-          <span className="text-xs text-gray-400">{connected ? 'Live' : 'Disconnected'}</span>
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 bg-gray-50">
+          <span className={`h-2 w-2 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`} />
+          <span className="text-xs font-medium text-gray-700">{connected ? 'Live' : 'Disconnected'}</span>
         </div>
       </div>
 
       {/* Stats */}
       {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="card">
-            <p className="text-xs text-gray-400 uppercase tracking-wider">Total Agents</p>
-            <p className="text-2xl font-bold mt-1">{stats.agentCount}</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-2">Total Agents</p>
+            <p className="text-3xl font-bold">{stats.agentCount}</p>
           </div>
           <div className="card">
-            <p className="text-xs text-gray-400 uppercase tracking-wider">Active</p>
-            <p className="text-2xl font-bold text-hive-bull mt-1">{stats.activeAgents}</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-2">Active</p>
+            <p className="text-3xl font-bold text-green-600">{stats.activeAgents}</p>
           </div>
           <div className="card">
-            <p className="text-xs text-gray-400 uppercase tracking-wider">Tweets</p>
-            <p className="text-2xl font-bold mt-1">{stats.tweetCount}</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-2">Tweets</p>
+            <p className="text-3xl font-bold">{stats.tweetCount}</p>
           </div>
           <div className="card">
-            <p className="text-xs text-gray-400 uppercase tracking-wider">Consensus Events</p>
-            <p className="text-2xl font-bold text-hive-accent mt-1">{stats.consensusEvents}</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-2">Consensus Events</p>
+            <p className="text-3xl font-bold text-black">{stats.consensusEvents}</p>
           </div>
         </div>
       )}
 
       {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Network Graph - Takes 2 columns */}
         <div className="lg:col-span-2 card min-h-[400px]">
-          <h2 className="text-sm font-semibold text-gray-300 mb-3">Agent Network</h2>
+          <h2 className="text-sm font-semibold text-black mb-4">Agent Network</h2>
           <NetworkGraph interactions={interactions} />
         </div>
 
         {/* Tweet Feed */}
         <div className="card max-h-[500px] overflow-hidden flex flex-col">
-          <h2 className="text-sm font-semibold text-gray-300 mb-3">Live Tweet Feed</h2>
+          <h2 className="text-sm font-semibold text-black mb-4">Live Tweet Feed</h2>
           <TweetFeed />
         </div>
       </div>
 
       {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         {/* Price Correlation */}
         <div className="card">
-          <h2 className="text-sm font-semibold text-gray-300 mb-3">Price vs Sentiment</h2>
+          <h2 className="text-sm font-semibold text-black mb-4">Price vs Sentiment</h2>
           <PriceCorrelation />
         </div>
 
         {/* Sentiment Heatmap */}
         <div className="card">
-          <h2 className="text-sm font-semibold text-gray-300 mb-3">Token Sentiment</h2>
+          <h2 className="text-sm font-semibold text-black mb-4">Token Sentiment</h2>
           <SentimentHeatmap sentiments={sentiments} />
         </div>
       </div>

@@ -11,6 +11,8 @@ interface Agent {
   strategy: string;
   twitterHandle: string;
   status: string;
+  lastHeartbeat?: string | null;
+  updatedAt?: string;
   createdAt: string;
   _count: { tweets: number; opinions: number };
 }
@@ -18,124 +20,88 @@ interface Agent {
 export default function AgentsPage() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCreate, setShowCreate] = useState(false);
-  const [form, setForm] = useState({ name: '', persona: '', strategy: '', twitterHandle: '' });
 
   useEffect(() => {
-    api.getAgents()
-      .then(setAgents)
-      .catch((err) => console.error('Failed to load agents:', err))
-      .finally(() => setLoading(false));
+    const loadAgents = () => {
+      api.getAgents()
+        .then(setAgents)
+        .catch((err) => console.error('Failed to load agents:', err))
+        .finally(() => setLoading(false));
+    };
+
+    // Initial load
+    loadAgents();
+
+    // Refresh every 10 seconds to update online status
+    const interval = setInterval(loadAgents, 10000);
+    return () => clearInterval(interval);
   }, []);
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const agent = await api.createAgent(form);
-      setAgents((prev) => [agent, ...prev]);
-      setForm({ name: '', persona: '', strategy: '', twitterHandle: '' });
-      setShowCreate(false);
-    } catch (err: any) {
-      alert(err.message);
-    }
-  };
-
-  const handleStatusChange = async (id: string, status: string) => {
-    try {
-      await api.updateAgentStatus(id, status);
-      setAgents((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
-    } catch (err: any) {
-      alert(`Failed to update status: ${err.message}`);
-    }
-  };
+  // Calculate online/offline stats
+  const onlineCount = agents.filter((a) => {
+    if (!a.lastHeartbeat) return false;
+    return Date.now() - new Date(a.lastHeartbeat).getTime() < 120000;
+  }).length;
 
   return (
-    <div className="min-h-screen p-4 md:p-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">AI Agents</h1>
-        <button
-          onClick={() => setShowCreate(!showCreate)}
-          className="px-4 py-2 bg-hive-accent text-black rounded-lg text-sm font-semibold hover:bg-hive-accent/90 transition"
-        >
-          + New Agent
-        </button>
+    <div className="min-h-screen p-6 md:p-8 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">AI Agents</h1>
+          <p className="text-sm text-gray-600 mt-2">
+            All registered agents across the network
+          </p>
+        </div>
+        <div className="flex items-center gap-6 text-sm">
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-green-500" />
+            <span className="text-gray-600">{onlineCount} Online</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-gray-400" />
+            <span className="text-gray-600">{agents.length - onlineCount} Offline</span>
+          </div>
+        </div>
       </div>
 
-      {/* Create Form */}
-      {showCreate && (
-        <form onSubmit={handleCreate} className="card mb-6 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="agent-name" className="block text-xs text-gray-400 mb-1">Agent Name</label>
-              <input
-                id="agent-name"
-                placeholder="e.g. Alpha Bot"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="w-full bg-hive-bg border border-hive-border rounded-lg px-3 py-2 text-sm"
-                required
-                maxLength={100}
-              />
-            </div>
-            <div>
-              <label htmlFor="twitter-handle" className="block text-xs text-gray-400 mb-1">Twitter Handle</label>
-              <input
-                id="twitter-handle"
-                placeholder="without @"
-                value={form.twitterHandle}
-                onChange={(e) => setForm({ ...form, twitterHandle: e.target.value.replace(/^@/, '') })}
-                className="w-full bg-hive-bg border border-hive-border rounded-lg px-3 py-2 text-sm"
-                required
-                maxLength={50}
-              />
-            </div>
-            <div>
-              <label htmlFor="persona" className="block text-xs text-gray-400 mb-1">Persona</label>
-              <select
-                id="persona"
-                value={form.persona}
-                onChange={(e) => setForm({ ...form, persona: e.target.value })}
-                className="w-full bg-hive-bg border border-hive-border rounded-lg px-3 py-2 text-sm"
-                required
-              >
-                <option value="">Select Persona</option>
-                <option value="Bullish Maximalist">Bullish Maximalist</option>
-                <option value="Bear Analyst">Bear Analyst</option>
-                <option value="DeFi Degen">DeFi Degen</option>
-                <option value="Macro Strategist">Macro Strategist</option>
-              </select>
-            </div>
-          </div>
+      {/* Info Banner */}
+      <div className="card mb-8 bg-amber-50 border-amber-200">
+        <div className="flex items-start gap-3">
+          <span className="text-2xl">🐝</span>
           <div>
-            <label htmlFor="strategy" className="block text-xs text-gray-400 mb-1">Investment Strategy</label>
-            <textarea
-              id="strategy"
-              placeholder="Detailed prompt for the AI agent..."
-              value={form.strategy}
-              onChange={(e) => setForm({ ...form, strategy: e.target.value })}
-              className="w-full bg-hive-bg border border-hive-border rounded-lg px-3 py-2 text-sm h-24"
-              required
-              maxLength={5000}
-            />
+            <h3 className="font-semibold text-sm mb-1">Distributed Agent Network</h3>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              Agents are run by developers on their own machines and automatically register with this Hub.
+              To run your own agent, see the{' '}
+              <a
+                href="https://github.com/yourusername/hivemind/blob/main/apps/agent-node/README.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-amber-800"
+              >
+                Agent Node documentation
+              </a>
+              .
+            </p>
           </div>
-          <button type="submit" className="px-4 py-2 bg-hive-accent text-black rounded-lg text-sm font-semibold">
-            Create Agent
-          </button>
-        </form>
-      )}
+        </div>
+      </div>
 
       {/* Agent Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {agents.map((agent) => (
-          <AgentCard key={agent.id} agent={agent} onStatusChange={handleStatusChange} />
+          <AgentCard key={agent.id} agent={agent} />
         ))}
         {loading && (
-          <p className="text-gray-500 col-span-full text-center py-12">Loading agents...</p>
+          <p className="text-gray-500 col-span-full text-center py-16">Loading agents...</p>
         )}
         {!loading && agents.length === 0 && (
-          <p className="text-gray-500 col-span-full text-center py-12">
-            No agents yet. Create your first AI agent to get started.
-          </p>
+          <div className="col-span-full text-center py-16">
+            <p className="text-gray-500 mb-4">No agents registered yet.</p>
+            <p className="text-sm text-gray-400">
+              Run an Agent Node to register your first agent.
+            </p>
+          </div>
         )}
       </div>
     </div>

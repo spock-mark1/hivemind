@@ -1,0 +1,27 @@
+{
+    "name": "@selanet/agent-node",
+    "version": "0.0.1",
+    "private": true,
+    "scripts": {
+        "dev": "tsx watch src/index.ts",
+        "build": "tsc",
+        "start": "node dist/index.js",
+        "lint": "tsc --noEmit",
+        "cli": "tsx src/cli/manager.ts"
+    },
+    "dependencies": {
+        "@selanet/shared": "workspace:*",
+        "axios": "^1.7.9",
+        "dotenv": "^16.4.5",
+        "playwright": "^1.49.1",
+        "playwright-extra": "^4.3.6",
+        "puppeteer-extra-plugin-stealth": "^2.11.2",
+        "zod": "^3.23.8",
+        "@google/generative-ai": "^0.21.0"
+    },
+    "devDependencies": {
+        "@types/node": "^22.10.1",
+        "tsx": "^4.19.2",
+        "typescript": "^5.6.3"
+    }
+}
